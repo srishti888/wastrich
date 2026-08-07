@@ -12,7 +12,16 @@ async function listSessions(req, res) {
 async function createSession(req, res) {
   const { questId, durationMin, engaged, interrupted } = req.body;
   const session = await prisma.clockInSession.create({
-    data: { userId: req.user.userId, questId, durationMin, engaged: engaged ?? null, interrupted: !!interrupted },
+    data: {
+      userId: req.user.userId,
+      questId,
+      durationMin,
+      engaged: engaged ?? null,
+      interrupted: !!interrupted,
+    },
+    include: {
+      quest: true,
+    },
   });
   res.status(201).json(session);
 }
