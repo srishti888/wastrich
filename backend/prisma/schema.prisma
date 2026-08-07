@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int              @id @default(autoincrement())
+  email       String           @unique
+  password    String
+  createdAt   DateTime         @default(now())
+  episodes    EpisodeLog[]
+  sessions    ClockInSession[]
+  preferences UserPreferences?
+}
+
+model UserPreferences {
+  id            Int     @id @default(autoincrement())
+  userId        Int     @unique
+  user          User    @relation(fields: [userId], references: [id])
+  trackEmotion  Boolean @default(true)
+  trackLocation Boolean @default(true)
+  trackTrigger  Boolean @default(true)
+}
+
+model EpisodeLog {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  targetArea  String
+  triggerTag  String?
+  emotionTag  String?
+  locationTag String?
+  isBlip      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model QuestLibraryItem {
+  id       Int              @id @default(autoincrement())
+  name     String
+  category String
+  sessions ClockInSession[]
+}
+
+model ClockInSession {
+  id          Int              @id @default(autoincrement())
+  userId      Int
+  user        User             @relation(fields: [userId], references: [id])
+  questId     Int
+  quest       QuestLibraryItem @relation(fields: [questId], references: [id])
+  durationMin Int
+  engaged     Boolean?
+  interrupted Boolean          @default(false)
+  startedAt   DateTime         @default(now())
+}
